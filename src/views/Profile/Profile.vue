@@ -2,17 +2,17 @@
   <section class="profile">
     <HeaderTop title="我的"></HeaderTop>
     <section class="profile-number">
-       <RouterLink to="/login" class="profile-link">
+       <RouterLink :to="userInfo?'/userinfo':'/login'" class="profile-link">
          <div class="profile_image">
            <i class="iconfont icon-person"></i>
          </div>
          <div class="user-info">
-           <p class="user-info-top">登录/注册</p>
+           <p class="user-info-top">{{userInfo?userInfo.name:'登录/注册'}}</p>
            <p>
               <span class="user-icon">
                 <i class="iconfont icon-shouji icon-mobile"></i>
               </span>
-             <span class="icon-mobile-number">暂无绑定手机号</span>
+              <span class="icon-mobile-number">{{userInfo.phone?userInfo.phone:'暂无绑定手机号'}}</span>
            </p>
          </div>
          <span class="arrow">
@@ -75,8 +75,8 @@
          </a>
        </section>
     <section class="profile_my_order border-1px">
-         <!-- 服务中心 -->
-         <a href="javascript:" class="my_order">
+      <!-- 服务中心 -->
+      <a href="javascript:" class="my_order">
             <span>
               <i class="iconfont icon-fuwu"></i>
             </span>
@@ -87,15 +87,31 @@
               </span>
            </div>
          </a>
-       </section>
+    </section>
+    <section class="profile_my_order border-1px">
+      <!-- 退出登录 -->
+      <mt-button type="danger" style="width: 100%" @click="logOut" v-if="userInfo">退出登录</mt-button>
+    </section>
   </section>
 </template>
 
 <script>
   import HeaderTop from '../../components/HeaderTop/HeaderTop'
+  import {mapState} from 'vuex'
+  import {MessageBox} from 'mint-ui'
   export default {
     components:{
       HeaderTop
+    },
+    computed:{
+      ...mapState(['userInfo'])
+    },
+    methods:{
+      logOut () {
+        MessageBox.confirm('确定要退出吗?').then(action => {
+          this.$store.dispatch('getUserLogout')
+        });
+      }
     }
   }
 

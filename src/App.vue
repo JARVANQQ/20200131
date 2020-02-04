@@ -9,16 +9,22 @@
 
 <script>
   import FooterGuide from './components/FooteGuide/FooteGuide'
-  import {reqFoodCategorys} from './api'
+  // import {reqAddress} from './api'//测试
+  import {mapActions} from 'vuex'
 
   export default {
 
     components:{
       FooterGuide
     },
-    async mounted () {
-      const result = await reqFoodCategorys()
-      console.log(result)
+    methods:{
+      ...mapActions(['getAddress', 'getConversationInfo'])
+    },
+    mounted () {
+      // 异 步 获 取 address
+      // this.$store.dispatch('getAddress')
+      this.getAddress()
+      this.getConversationInfo()
     }
   }
 </script>
@@ -27,6 +33,6 @@
   #app
     width 100%
     height 100%
-    background #f5f5f5
-    position relative
+    /*background #f5f5f5*/
+    /*position relative*/
 </style>
