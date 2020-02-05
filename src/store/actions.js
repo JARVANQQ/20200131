@@ -11,7 +11,9 @@ import {
 
   RECEIVE_INFO,
   RECEIVE_GOODS,
-  RECEIVE_RATINGS
+  RECEIVE_RATINGS,
+  INCREASE_COUNT,
+  REMOVE_COUNT
 } from './mutation-types'
 
 import {
@@ -98,6 +100,15 @@ export default {
     if (result.code===0) {
       const ratings = result.data
       commit(RECEIVE_RATINGS, {ratings})
+    }
+  },
+
+  //跟新Food中的Count
+  updateFoodCount ({commit}, {isAdd, food}) {
+    if (isAdd) {
+      commit(INCREASE_COUNT, {food})
+    }else {
+      commit(REMOVE_COUNT, {food})
     }
   }
 }

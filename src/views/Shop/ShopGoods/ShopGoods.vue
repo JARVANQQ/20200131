@@ -4,7 +4,8 @@
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
           <!-- 类名：current-->
-          <li class="menu-item" v-for="(good, index) in goods" :key="index" :class="{current:index===currentIndex}">
+          <li class="menu-item" v-for="(good, index) in goods" :key="index"
+              :class="{current:index===currentIndex}" @click="jumpFoodList(index)">
             <span class="text bottom-border-1px">
               <img class="icon" :src="good.icon" v-if="good.icon">
               {{good.name}}
@@ -13,12 +14,13 @@
         </ul>
       </div>
       <div class="foods-wrapper" ref="foodsWrapper">
-        <ul>
+        <ul ref="menuItemUl">
           <!--类名：food-list-->
           <li class="food-list-hook" v-for="(good, index) in goods" :key="index">
             <h1 class="title">{{good.name}}</h1>
             <ul>
-              <li class="food-item bottom-border-1px" v-for="(food, index) in good.foods" :key="index">
+              <li class="food-item bottom-border-1px" v-for="(food, index) in good.foods" :key="index"
+                  @click="toggleShowFood(food)">
                 <div class="icon">
                   <img width="57" height="57" :src="food.icon">
                 </div>
@@ -30,10 +32,10 @@
                     <span>好评率{{food.rating}}%</span></div>
                   <div class="price">
                     <span class="now">￥{{food.price}}</span>
-                    <span class="old">￥{{food.oldPrice}}</span>
+                    <span class="old" v-if="food.oldPrice">￥{{food.oldPrice}}</span>
                   </div>
                   <div class="cartcontrol-wrapper">
-                    CartControl
+                    <CartControl :food="food"></CartControl>
                   </div>
                 </div>
               </li>
@@ -41,22 +43,70 @@
           </li>
         </ul>
       </div>
+      <ShopCart></ShopCart>
     </div>
+    <Food :food="food" ref="showFoods"></Food>
   </div>
 </template>
 
 <script>
   import {mapState, mapActions} from 'vuex'
   import BScroll from '@better-scroll/core'
+
+  import CartControl from '../../../components/CartControl/CartControl'
+  import ShopCart from '../../../components/ShopCart/ShopCart'
+  import Food from '../../../components/Food/Food'
   export default {
+    data () {
+      return{
+        scrollY:0,
+        tops:[],
+        food: {}
+      }
+    },
     methods:{
-      ...mapActions(['getShopGoods'])
+      ...mapActions(['getShopGoods']),
+      //获取到实时的scrollY
+      _initScrollY () {
+        this.foodsScroll.on('scroll', (event) => {
+          let scrollY = event.y
+          this.scrollY = Math.abs(scrollY)
+        })
+      },
+      //获取到每个li的top值
+      _initTops () {
+        let tops = []
+        let top = 0
+        let lis = this.$refs.menuItemUl.children
+        tops.push(top)
+        //将lis伪数组转为真数组并且遍历
+        Array.prototype.slice.call(lis).forEach(li => {
+          top += li.clientHeight
+          tops.push(top)
+        })
+        this.tops = tops
+      },
+      //点击menu，右侧跳转到对应的foodList
+      jumpFoodList (index) {
+        this.scrollY = -this.tops[index]
+        this.foodsScroll.scrollTo(0, this.scrollY)
+      },
+      toggleShowFood (food) {
+        this.food = food
+        //调用子组件对象的方法
+        this.$refs.showFoods.showFood()
+      }
     },
     computed:{
       ...mapState(['goods']),
-
       currentIndex () {
-
+        const scrollY = this.scrollY
+        const {tops} = this
+        let index = this.tops.findIndex((element, index) => {
+          //判断当前的scroll是否在tops[index]~top[index+1],是的话则当前的class为current,返回当前的索引下标
+          return scrollY >= tops[index] && scrollY < tops[index+1]
+        })
+        return index
       }
     },
     mounted () {
@@ -65,17 +115,26 @@
     },
     watch:{
       goods () {
-        this.$nextTick(function () {
-          let menuWrapper = new BScroll('.menu-wrapper', {
+        this.$nextTick(() => {
+          new BScroll('.menu-wrapper', {
             // ...... 详见配置项
             click:true
           })
-          let foodsWrapper = new BScroll('.foods-wrapper', {
+          this.foodsScroll = new BScroll('.foods-wrapper', {
             // ...... 详见配置项
-            click:true
+            click:true,
+            probeType:3
           })
+          //获取Tops的值
+          this._initTops()
+          this._initScrollY()
         })
       }
+    },
+    components:{
+      CartControl,
+      ShopCart,
+      Food
     }
   }
 
