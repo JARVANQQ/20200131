@@ -19,29 +19,35 @@
           </div>
         </div>
       </div>
-      <div class="shopcart-list" v-show="showList">
-        <div class="list-header">
-          <h1 class="title">购物车</h1>
-          <span class="empty">清空</span>
+      <transition name="move">
+        <div class="shopcart-list" v-show="showList">
+          <div class="list-header">
+            <h1 class="title">购物车</h1>
+            <span class="empty" @click.stop="clearShopCart">清空</span>
+          </div>
+          <div class="list-content">
+            <ul>
+              <li class="food" v-for="(food, index) in shopCart" :key="index">
+                <span class="name">{{food.name}}</span>
+                <div class="price"><span>￥{{food.price}}</span></div>
+                <div class="cartcontrol-wrapper">
+                  <CartControl :food="food"></CartControl>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div class="list-content">
-          <ul>
-            <li class="food" v-for="(food, index) in shopCart" :key="index">
-              <span class="name">{{food.name}}</span>
-              <div class="price"><span>￥{{food.price}}</span></div>
-              <div class="cartcontrol-wrapper">
-                <CartControl :food="food"></CartControl>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
+      </transition>
     </div>
-    <div class="list-mask" v-show="showList" @click="toggleShowShopCart"></div>
+    <transition name="fade">
+      <div class="list-mask" v-show="showList" @click="toggleShowShopCart"></div>
+    </transition>
   </div>
 </template>
 
 <script>
+  import BScroll from 'better-scroll'
+  import {MessageBox} from 'mint-ui'
   import {mapState, mapGetters} from 'vuex'
   import CartControl from '../../components/CartControl/CartControl'
   export default {
@@ -74,14 +80,33 @@
           this.isShow = false
           return false
         }
+        //如果isShow为true时，加载滚轮
+        if (this.isShow) {
+          this.$nextTick(() => {
+            this.scroll = new BScroll('.list-content', {
+              // ...... 详见配置项
+              click: true
+            })
+          })
+        }
         return isShow
       }
     },
     methods: {
       toggleShowShopCart () {
         this.isShow = ! this.isShow
+      },
+      clearShopCart () {
+        MessageBox.confirm('确定清空购物车吗?').then(action => {
+          this.$store.dispatch('clearShopCart')
+        });
       }
     },
+    // watch: {
+    //   shopCart (newVaule) {
+    //
+    //   }
+    // },
     components: {
       CartControl
     }
@@ -190,7 +215,7 @@
           width 16px
           height 16px
           border-radius 50%
-          background $green
+          background #00b43c
           transition all 0.4s linear
     .shopcart-list
       position absolute
@@ -256,9 +281,8 @@
     opacity 1
     background rgba(7, 17, 27, 0.6)
     &.fade-enter-active, &.fade-leave-active
-      transition all 0.5s
+      transition opacity .3s
     &.fade-enter, &.fade-leave-to
       opacity 0
-      background rgba(7, 17, 27, 0)
 </style>
 

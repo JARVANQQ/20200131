@@ -2,7 +2,7 @@
   <div class="food" v-show="isShow">
     <div class="food-content">
       <div class="image-header">
-        <img :src="food.image">
+        <img v-lazy="food.image">
         <p class="foodpanel-desc">{{food.info}}</p>
         <div class="back" @click="showFood">
           <i class="iconfont icon-arrow_left"></i>
@@ -19,7 +19,7 @@
           <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
         </div>
         <div class="cartcontrol-wrapper">
-          cartcontrol 组件
+          <CartControl :food="food"></CartControl>
         </div>
       </div>
     </div>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-
+  import CartControl from '../CartControl/CartControl'
   export default {
     props: {
       food: Object
@@ -42,6 +42,9 @@
       showFood () {
         this.isShow = !this.isShow
       }
+    },
+    components: {
+      CartControl
     }
   }
 

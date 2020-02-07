@@ -51,7 +51,7 @@
 
 <script>
   import {mapState, mapActions} from 'vuex'
-  import BScroll from '@better-scroll/core'
+  import BScroll from 'better-scroll'
 
   import CartControl from '../../../components/CartControl/CartControl'
   import ShopCart from '../../../components/ShopCart/ShopCart'
@@ -114,7 +114,7 @@
       this.getShopGoods()
     },
     watch:{
-      goods () {
+      goods (newValue) {
         this.$nextTick(() => {
           new BScroll('.menu-wrapper', {
             // ...... 详见配置项

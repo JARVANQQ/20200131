@@ -13,7 +13,8 @@ import {
   RECEIVE_GOODS,
   RECEIVE_RATINGS,
   INCREASE_COUNT,
-  REMOVE_COUNT
+  REMOVE_COUNT,
+  CLEAR_SHOP_CART
 } from './mutation-types'
 
 import {
@@ -53,10 +54,13 @@ export default {
     commit(RECEIVE_SHOPS, {shops:result.data})
   },
   //4.异步获取搜索商铺列表
-  /*async getSearchShop ({commit, state}) {
-    const result = await reqSearchShop(geohash)
-    commit(RECEIVE_SEARCH, {search:result.data})
-  }*/
+  async getSearchShop ({commit, state}, {keyword}) {
+    const geohash = state.latitude + ',' + state.longitude
+    const result = await reqSearchShop({geohash, keyword})
+    if (result.code===0) {
+      commit(RECEIVE_SEARCH, {search:result.data})
+    }
+  },
   //同步存储用户的信息
   storageUserInfo ({commit}, userInfo) {
     commit(RECEIVE_USER_INFO, {userInfo})
@@ -95,11 +99,13 @@ export default {
     }
   },
   //异步获取商家评价数组
-  async getShopRatings ({commit}) {
+  async getShopRatings ({commit}, callback) {
     const result = await reqShopRatings()
     if (result.code===0) {
       const ratings = result.data
       commit(RECEIVE_RATINGS, {ratings})
+
+      callback && callback()
     }
   },
 
@@ -110,5 +116,10 @@ export default {
     }else {
       commit(REMOVE_COUNT, {food})
     }
+  },
+
+  //清空购物车
+  clearShopCart ({commit}) {
+    commit(CLEAR_SHOP_CART)
   }
 }

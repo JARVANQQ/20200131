@@ -16,3 +16,4 @@ export const RECEIVE_RATINGS = 'receive_ratings' // 接收商家评价数组
 export const INCREASE_COUNT = 'increase_count' // 增加count
 export const REMOVE_COUNT = 'remove_count' // 减少count
 
+export const CLEAR_SHOP_CART = 'clear_shop_cart' // 清空购物车
